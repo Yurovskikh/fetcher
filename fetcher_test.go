@@ -13,10 +13,14 @@ import (
 )
 
 func TestNewFetcher(t *testing.T) {
+	defer func() {
+		singleton = nil
+	}()
+
 	fetchers := make([]Fetcher, 0, 10000)
 	wg := &sync.WaitGroup{}
 	mu := &sync.Mutex{}
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10000; i++ {
 		wg.Add(1)
 		go func(wg *sync.WaitGroup, mu *sync.Mutex) {
 			defer wg.Done()
@@ -33,6 +37,10 @@ func TestNewFetcher(t *testing.T) {
 	}
 }
 func TestFetcher_Get(t *testing.T) {
+	defer func() {
+		singleton = nil
+	}()
+
 	testData := generateRandomString(10)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		assert.Equal(t, "/get", req.URL.String())
@@ -50,6 +58,10 @@ func TestFetcher_Get(t *testing.T) {
 	assert.NotEmpty(t, get)
 }
 func TestFetcher_List(t *testing.T) {
+	defer func() {
+		singleton = nil
+	}()
+
 	testData := make([]string, 10)
 	for index := range testData {
 		testData[index] = generateRandomString(10)
