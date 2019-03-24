@@ -18,7 +18,7 @@
 ### Using:
 ```go get github.com/Yurovskikh/fetcher```
 
-### Example
+### Example:
     fetcher := fetcher.NewFetcher("http://localhost:8080", 5*time.Second)
     
     get, err := fetcher.Get()
@@ -32,3 +32,6 @@
     	log.Printf("failed to fetcher list: %s", err)
     }
     fmt.Println(list)
+    
+#### Оптимизация:
+При создании инстанса fetcher не оптимально используются блокировки, при желании можно использовать ```sync.Once```
