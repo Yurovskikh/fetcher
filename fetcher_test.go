@@ -15,23 +15,21 @@ import (
 func TestNewFetcher(t *testing.T) {
 	defer func() {
 		singleton = nil
+		done = 0
 	}()
 
-	fetchers := make([]Fetcher, 0, 10000)
-	wg := &sync.WaitGroup{}
-	mu := &sync.Mutex{}
-	for i := 0; i < 10000; i++ {
+	fetchers := make([]Fetcher, 0, 100000)
+	wg := sync.WaitGroup{}
+	for i := 0; i < 100000; i++ {
 		wg.Add(1)
-		go func(wg *sync.WaitGroup, mu *sync.Mutex) {
+		go func(wg *sync.WaitGroup) {
 			defer wg.Done()
-			mu.Lock()
-			fetchers = append(fetchers, NewFetcher("", time.Second))
-			mu.Unlock()
-		}(wg, mu)
+			fetchers = append(fetchers, NewFetcher("http://localhost:8080", time.Second))
+		}(&wg)
 	}
 	wg.Wait()
 	// Удостоверимся что все экземляры ссылаются на один и тот же синглтон
-	pointer := reflect.ValueOf(NewFetcher("", time.Second)).Pointer()
+	pointer := reflect.ValueOf(NewFetcher("http://localhost:8080", time.Second)).Pointer()
 	for _, fetcher := range fetchers {
 		assert.Equal(t, pointer, reflect.ValueOf(fetcher).Pointer())
 	}
@@ -39,6 +37,7 @@ func TestNewFetcher(t *testing.T) {
 func TestFetcher_Get(t *testing.T) {
 	defer func() {
 		singleton = nil
+		done = 0
 	}()
 
 	testData := generateRandomString(10)
@@ -60,6 +59,7 @@ func TestFetcher_Get(t *testing.T) {
 func TestFetcher_List(t *testing.T) {
 	defer func() {
 		singleton = nil
+		done = 0
 	}()
 
 	testData := make([]string, 10)
@@ -71,7 +71,7 @@ func TestFetcher_List(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		json.NewEncoder(w).Encode(getDataSetResponse{
-			DataSet:testData,
+			DataSet: testData,
 		})
 	}))
 	defer server.Close()
