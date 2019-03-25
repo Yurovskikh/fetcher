@@ -32,6 +32,3 @@
     	log.Printf("failed to fetcher list: %s", err)
     }
     fmt.Println(list)
-    
-#### Оптимизация:
-При создании инстанса fetcher не оптимально используются блокировки, при желании можно использовать ```sync.Once```
