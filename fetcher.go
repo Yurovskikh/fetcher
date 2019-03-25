@@ -9,14 +9,12 @@ import (
 	"net"
 	"net/http"
 	"sync"
-	"sync/atomic"
 	"time"
 )
 
 var (
-	mu        sync.Mutex
-	done      uint32
 	singleton *fetcher
+	once      sync.Once
 )
 
 type Fetcher interface {
@@ -31,14 +29,7 @@ type fetcher struct {
 }
 
 func NewFetcher(url string, timeout time.Duration) Fetcher {
-	if atomic.LoadUint32(&done) == 1 {
-		return singleton
-	}
-	mu.Lock()
-	defer mu.Unlock()
-	if done == 0 {
-		defer atomic.StoreUint32(&done, 1)
-
+	once.Do(func() {
 		transport := &http.Transport{
 			DialContext: (&net.Dialer{
 				Timeout:   30 * time.Second,
@@ -59,7 +50,7 @@ func NewFetcher(url string, timeout time.Duration) Fetcher {
 			httpClient: httpClient,
 			url:        url,
 		}
-	}
+	})
 	return singleton
 }
 

@@ -15,7 +15,7 @@ import (
 func TestNewFetcher(t *testing.T) {
 	defer func() {
 		singleton = nil
-		done = 0
+		once = sync.Once{}
 	}()
 
 	fetchers := make([]Fetcher, 0, 100000)
@@ -37,7 +37,7 @@ func TestNewFetcher(t *testing.T) {
 func TestFetcher_Get(t *testing.T) {
 	defer func() {
 		singleton = nil
-		done = 0
+		once = sync.Once{}
 	}()
 
 	testData := generateRandomString(10)
@@ -59,7 +59,7 @@ func TestFetcher_Get(t *testing.T) {
 func TestFetcher_List(t *testing.T) {
 	defer func() {
 		singleton = nil
-		done = 0
+		once = sync.Once{}
 	}()
 
 	testData := make([]string, 10)
